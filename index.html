@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Memory Matching Game</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #1e1e2f;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    h1, h3 {
+      margin: 5px;
+    }
+    #stats, #message {
+      margin: 10px 0;
+      font-size: 16px;
+    }
+    #message {
+      color: gold;
+      font-weight: bold;
+    }
+    #game {
+      display: grid;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .card {
+      width: 80px;
+      height: 100px;
+      background: #444;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 40px;
+      cursor: pointer;
+      border-radius: 8px;
+      user-select: none;
+      transition: all 0.3s ease;
+      font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "Twemoji Mozilla", "Segoe UI", Arial, sans-serif;
+    }
+    .flipped {
+      background: #888;
+    }
+    .matched {
+      background: green;
+      color: white;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: gold;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Memory Matching Game</h1>
+  <h3>Developed by Shubh</h3>
+  <div id="stats">Score: 0 | Level: 1 | Tries: 0 | Matches: 0</div>
+  <div id="game"></div>
+  <div id="message"></div>
+  <button onclick="restartGame()">Restart Game</button>
+
+  <script>
+    const allEmojis = ['🐶', '🐱', '🐰', '🦊', '🐵', '🐼', '🦁', '🐯', '🐸', '🐮', '🐔', '🐷'];
+    let level = 1, score = 0, tries = 0, matches = 0;
+    let first = null, second = null;
+    const maxPairs = allEmojis.length;
+
+    function shuffle(arr) {
+      return arr.sort(() => Math.random() - 0.5);
+    }
+
+    function updateStats() {
+      document.getElementById('stats').innerText = 
+        `Score: ${score} | Level: ${level} | Tries: ${tries} | Matches: ${matches}`;
+    }
+
+    function getGridColumns(pairs) {
+      if (pairs <= 4) return 3;
+      if (pairs <= 6) return 4;  // for 6 pairs (12 cards), 4 columns looks good
+      if (pairs <= 8) return 5;
+      return 6;
+    }
+
+    function createGameBoard() {
+      const game = document.getElementById('game');
+      game.innerHTML = '';
+      document.getElementById('message').innerText = '';
+
+      // Level 1 has 6 pairs (12 cards), next levels +2 pairs, max pairs limit
+      const numPairs = Math.min(6 + (level - 1) * 2, maxPairs);
+      const emojis = shuffle([...allEmojis.slice(0, numPairs), ...allEmojis.slice(0, numPairs)]);
+      const columns = getGridColumns(numPairs);
+      game.style.gridTemplateColumns = `repeat(${columns}, 80px)`;
+
+      emojis.forEach((emoji, index) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.dataset.emoji = emoji;
+        card.dataset.index = index;
+        card.innerText = '❓';
+        card.addEventListener('click', () => flipCard(card));
+        game.appendChild(card);
+      });
+
+      matches = 0;
+      tries = 0;
+      updateStats();
+    }
+
+    function flipCard(card) {
+      if (card.classList.contains('flipped') || card.classList.contains('matched') || second) return;
+
+      card.classList.add('flipped');
+      card.innerText = card.dataset.emoji;
+
+      if (!first) {
+        first = card;
+      } else {
+        second = card;
+        tries++;
+
+        if (first.dataset.emoji === second.dataset.emoji) {
+          first.classList.add('matched');
+          second.classList.add('matched');
+          matches++;
+          score += 10;
+          resetFlip();
+
+          if (matches === document.querySelectorAll('.card').length / 2) {
+            document.getElementById('message').innerText = `Level ${level} completed!`;
+            setTimeout(() => {
+              level++;
+              createGameBoard();
+            }, 1500);
+          }
+        } else {
+          score = Math.max(0, score - 2);
+          setTimeout(() => {
+            first.innerText = '❓';
+            second.innerText = '❓';
+            first.classList.remove('flipped');
+            second.classList.remove('flipped');
+            resetFlip();
+          }, 800);
+        }
+
+        updateStats();
+      }
+    }
+
+    function resetFlip() {
+      first = null;
+      second = null;
+    }
+
+    function restartGame() {
+      level = 1;
+      score = 0;
+      createGameBoard();
+    }
+
+    window.onload = createGameBoard;
+  </script>
+</body>
+</html>
