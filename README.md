@@ -16,9 +16,11 @@ A fun and interactive memory card matching game built with HTML, CSS, and JavaSc
 
 ## How to Play
 
+https://shubh-tamrakar.github.io/memory-game/
+
 1. Click on any card to flip it and reveal the image.  
 2. Try to find the matching pair by remembering card positions.  
 3. Match all pairs to complete the level and increase your score.  
 4. Use your memory and speed to beat the game!  
-
+  
 ---
